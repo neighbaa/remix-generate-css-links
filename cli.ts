@@ -1,12 +1,12 @@
 #!/usr/bin/env node
+require('ts-node').register()
+
 import meow from 'meow';
-import * as fs from 'fs';
-import * as path from 'path';
 import chokidar from 'chokidar';
 import type { Dirent } from "fs"
 
 const dependencyTree = require('dependency-tree');
-const { resolve } = require('path');
+const { resolve, join } = require('path');
 const { readdir, writeFile } = require('fs').promises;
 const { ensureFile } = require('fs-extra');
 
@@ -52,7 +52,7 @@ const appdir = `${projectRoot}/${remixAppDirectory}`
 const appdirLength = appdir.length
 
 // include routes/ in filepath
-const promiseMeAllStyleLinksInOneFile = async (filepath: string) => {
+const allStyleLinksInOneFile = async (filepath: string) => {
   const reducedList: any = []
   
   dependencyTree.toList({
@@ -90,7 +90,7 @@ export const mergeOtherLinks = (_links: HtmlLinkDescriptor[]) => {
 }
 `;
   
-  const generatedFileTarget = `app/${OUTDIR}}/${filepath.split(".").slice(0,-1).join(".")}.generated-links.ts`
+  const generatedFileTarget = `app/${OUTDIR}/${filepath.split(".").slice(0,-1).join(".")}.generated-links.ts`
   await ensureFile(generatedFileTarget);
   await writeFile(generatedFileTarget, data);
 }
@@ -105,7 +105,7 @@ async function processFileTree(dir: string) {
   }).map(async (dirent: Dirent) => {
     const fullPath = await resolve(dir, dirent.name)
     const pathFromAppDirectory = (fullPath).substring(appdirLength+1)
-    return await promiseMeAllStyleLinksInOneFile(pathFromAppDirectory)
+    return await allStyleLinksInOneFile(pathFromAppDirectory)
   }));
   // handle subdirs
   await Promise.all(subDirs.map(async (dirent: Dirent) => await processFileTree(await resolve(dir, dirent.name))))
@@ -113,12 +113,12 @@ async function processFileTree(dir: string) {
 
 const build = async () => {
   const appRootfilename = require.resolve(resolve(appdir, "root")).substring(appdirLength+1)
-  await promiseMeAllStyleLinksInOneFile(appRootfilename)
+  await allStyleLinksInOneFile(appRootfilename)
   await processFileTree(`${appdir}/routes`)
 }
 
 function watch() {
-  chokidar.watch([path.join(projectRoot, 'app/routes/**/*.{ts,tsx}'), path.join(projectRoot, 'remix.config.js')]).on('change', () => {
+  chokidar.watch([join(projectRoot, 'app/routes/**/*.{ts,tsx}'), join(projectRoot, 'remix.config.js')]).on('change', () => {
     build();
   });
   console.log('Watching for changes in your app routes...');
