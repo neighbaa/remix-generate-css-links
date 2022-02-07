@@ -1,17 +1,16 @@
 {
-  "include": ["remix.env.d.ts", "**/*.ts", "**/*.tsx"],
+  "include": ["*.ts","**/*.ts", "**/*.tsx"],
   "compilerOptions": {
     "allowJs": true,
-    "lib": ["DOM", "DOM.Iterable", "ES2019"],
+    "skipLibCheck": true,
+    "outDir": "lib",
     "isolatedModules": true,
     "esModuleInterop": true,
     "jsx": "react-jsx",
-    "module":"CommonJS",
+    "module":"ES2020",
     "moduleResolution": "node",
     "resolveJsonModule": true,
-    "target": "ES2019",
-    "strict": true,
-    "baseUrl": ".",
-    "noEmit": true
+    "target": "ES2020",
+    "strict": true
   }
 }

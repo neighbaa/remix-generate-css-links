@@ -30,6 +30,7 @@ Options
 `;
 
 const cli = meow(helpText, {
+  importMeta: import.meta,
   flags: {
     watch: {
       type: "boolean",
