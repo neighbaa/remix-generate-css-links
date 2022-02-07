@@ -118,8 +118,10 @@ const build = async () => {
 }
 
 function watch() {
-  chokidar.watch([join(projectRoot, 'app/routes/**/*.{ts,tsx}'), join(projectRoot, 'remix.config.js')]).on('change', () => {
-    build();
+  const projectRoutes = join(`${projectRoot}`, 'app/routes/**/*.{js,jsx,ts,tsx}')
+  const projectConfig = join(`${projectRoot}`, 'remix.config.js')
+  chokidar.watch([projectRoutes, projectConfig]).on('change', () => {
+      build();
   });
   console.log('Watching for changes in your app routes...');
 }
