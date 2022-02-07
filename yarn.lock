@@ -686,6 +686,10 @@ readdirp@~3.6.0:
   dependencies:
     picomatch "^2.2.1"
 
+"remix-generate-css-links@https://github.com/neighbaa/remix-generate-css-links.git":
+  version "1.0.0"
+  resolved "https://github.com/neighbaa/remix-generate-css-links.git#bbd9d12492e4c7e9d1088c1f33daa6717aa1ef6c"
+
 requirejs-config-file@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/requirejs-config-file/-/requirejs-config-file-4.0.0.tgz#4244da5dd1f59874038cc1091d078d620abb6ebc"

@@ -13,8 +13,8 @@
   "keywords": [
     "remix",
     "remix.run",
-    "css",
     "generate",
+    "css",
     "links"
   ],
   "author": "Julian Hoben",
@@ -26,9 +26,9 @@
   "devDependencies": {
     "@types/node": "^17.0.15",
     "app-root-path": "^3.0.0",
+    "chokidar": "^3.5.3",
     "dependency-tree": "^8.1.2",
-    "fs-extra": "^10.0.0",
-    "chokidar": "^3.5.3"
+    "fs-extra": "^10.0.0"
   },
   "peerDependencies": {
     "concurrently": "^6.x"
