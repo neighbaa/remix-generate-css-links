@@ -1,18 +1,49 @@
-
+#!/usr/bin/env node
+import meow from 'meow';
+import * as fs from 'fs';
+import * as path from 'path';
+import chokidar from 'chokidar';
 import type { Dirent } from "fs"
+
 const dependencyTree = require('dependency-tree');
 const { resolve } = require('path');
 const { readdir, writeFile } = require('fs').promises;
 const { ensureFile } = require('fs-extra');
-const projectRoot = require("app-root-path")
 
+const projectRoot = process.env.REMIX_ROOT || require("app-root-path")
 const remixConfig = require(`${projectRoot}/remix.config`)
 
 // ensure remixConfig is available at the project root dir
 if(!remixConfig) {
-  console.error("Cannot find remix.config.js. Are you sure this is a remix project?")
+  console.error("Cannot find remix.config.js. Check that this is a Remix.run project.")
   process.exit(1)
 }
+
+let OUTDIR: string = ".generated-css-links"
+
+const helpText = `
+Usage
+$ remix-generate-css-links
+Options
+--watch, -w  Watch for routes changes
+--outdir -o Provide app/<output directory name> for directory to output links files (default ${OUTDIR})
+`;
+
+const cli = meow(helpText, {
+  flags: {
+    watch: {
+      type: "boolean",
+      alias: "w"
+    },
+    outdir: {
+      type: "string",
+      alias: "o"
+    }
+  }
+});
+
+if(typeof cli.flags.outdir === "string" && cli.flags.outdir.length) OUTDIR = cli.flags.outdir
+
 
 // determine app directory
 const remixAppDirectory = remixConfig.appDirectory || "app"
@@ -21,21 +52,21 @@ const appdirLength = appdir.length
 
 // include routes/ in filepath
 const promiseMeAllStyleLinksInOneFile = async (filepath: string) => {
-const reducedList: any = []
-
-dependencyTree.toList({
-  filename: `${appdir}/${filepath}`,
-  directory: `${appdir}/`,
-  tsConfig: `${projectRoot}/tsconfig.json`,
-  filter: (path: string) => path.indexOf('node_modules') === -1 && path.indexOf('_generatedRouteCSSLinks') === -1,
-})
-  .forEach((path: string) => {
-    const pathCheck = path.substring(0,appdirLength)
-    if(pathCheck === appdir && path.split(".").slice(-1)[0] === "css") {
-      reducedList.push(`~${path.substring(appdirLength)}`)
-    } 
-  });
-
+  const reducedList: any = []
+  
+  dependencyTree.toList({
+    filename: `${appdir}/${filepath}`,
+    directory: `${appdir}/`,
+    tsConfig: `${projectRoot}/tsconfig.json`,
+    filter: (path: string) => path.indexOf('node_modules') === -1 && path.indexOf(OUTDIR) === -1,
+  })
+    .forEach((path: string) => {
+      const pathCheck = path.substring(0,appdirLength)
+      if(pathCheck === appdir && path.split(".").slice(-1)[0] === "css") {
+        reducedList.push(`~${path.substring(appdirLength)}`)
+      } 
+    });
+  
 let data =
 `import type { HtmlLinkDescriptor } from "remix";
 ${reducedList.map((path: string, index: number) => `import _${index} from "${path}";`).join("\n")}
@@ -57,12 +88,12 @@ export const mergeOtherLinks = (_links: HtmlLinkDescriptor[]) => {
   return _links.concat(links().filter(link => !uniqueLinksHrefMap[link.href]))
 }
 `;
-
-const generatedFileTarget = `app/_generatedRouteCSSLinks/${filepath.split(".").slice(0,-1).join(".")}.generated_links.ts`
-await ensureFile(generatedFileTarget);
-await writeFile(generatedFileTarget, data);
+  
+  const generatedFileTarget = `app/${OUTDIR}}/${filepath.split(".").slice(0,-1).join(".")}.generated-links.ts`
+  await ensureFile(generatedFileTarget);
+  await writeFile(generatedFileTarget, data);
 }
-
+  
 async function processFileTree(dir: string) {
   const dirents = await readdir(dir, { withFileTypes: true });
   const subDirs: Dirent[] = []
@@ -79,12 +110,19 @@ async function processFileTree(dir: string) {
   await Promise.all(subDirs.map(async (dirent: Dirent) => await processFileTree(await resolve(dir, dirent.name))))
 }
 
-const runWithAppRoot = async () => {
+const build = async () => {
   const appRootfilename = require.resolve(resolve(appdir, "root")).substring(appdirLength+1)
   await promiseMeAllStyleLinksInOneFile(appRootfilename)
   await processFileTree(`${appdir}/routes`)
 }
 
-runWithAppRoot()
+function watch() {
+  chokidar.watch([path.join(projectRoot, 'app/routes/**/*.{ts,tsx}'), path.join(projectRoot, 'remix.config.js')]).on('change', () => {
+    build();
+  });
+  console.log('Watching for changes in your app routes...');
+}
 
-export {}
+if (require.main === module) {
+  (async function () { await (cli.flags.watch ? watch : build )() })();
+}
