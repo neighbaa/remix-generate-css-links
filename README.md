@@ -21,13 +21,13 @@
 - Using yarn:
 
 ```bash
-$ yarn add remix-generate-css-links
+$ yarn add --dev remix-generate-css-links
 ```
 
 - Using npm:
 
 ```bash
-$ npm add remix-generate-css-links
+$ npm install --save-dev remix-generate-css-links
 ```
 
 ## Setup
