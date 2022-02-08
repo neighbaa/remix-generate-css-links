@@ -46,6 +46,8 @@
     "typescript": "^4.5.5"
   },
   "peerDependencies": {
-    "concurrently": "^6.x"
+    "concurrently": "^6.x",
+    "ts-node": "^10.4.0"
+    
   }
 }
