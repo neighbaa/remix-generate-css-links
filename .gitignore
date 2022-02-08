@@ -1,7 +1,9 @@
 node_modules
+lib
 
 /.cache
 /build
 /public/build
 .env
 .archive
+
