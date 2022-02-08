@@ -111,22 +111,34 @@ async function processFileTree(dir: string) {
   await Promise.all(subDirs.map(async (dirent: Dirent) => await processFileTree(await resolve(dir, dirent.name))))
 }
 
+
+const debounce = (callback: Function, wait: number) => {
+  let timeout: any = null
+  return (...args: any) => {
+    const next = () => callback(...args)
+    clearTimeout(timeout)
+    timeout = setTimeout(next, wait)
+  }
+}
+
 const build = async () => {
   const appRootfilename = require.resolve(resolve(appdir, "root")).substring(appdirLength+1)
   await allStyleLinksInOneFile(appRootfilename)
   await processFileTree(`${appdir}/routes`)
 }
 
+const debouncedBuild = debounce(build, 200)
+
 function watch() {
-  build();
+  debouncedBuild();
   const projectRoutes = join(`${projectRoot}`, 'app/routes/**/*.{js,jsx,ts,tsx}')
   const projectConfig = join(`${projectRoot}`, 'remix.config.js')
   chokidar.watch([projectRoutes, projectConfig]).on('change', () => {
-      build();
+      debouncedBuild();
   });
   console.log('Watching for changes in your app routes...');
 }
 
 if (require.main === module) {
-  (async function () { await (cli.flags.watch ? watch : build )() })();
+  (async function () { await (cli.flags.watch ? watch : debouncedBuild )() })();
 }
