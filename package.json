@@ -36,18 +36,17 @@
     "url": "https://github.com/neighbaa/remix-generate-css-links/issues"
   },
   "homepage": "https://github.com/neighbaa/remix-generate-css-links#readme",
-  "devDependencies": {
-    "@types/node": "^17.0.15",
+  "dependencies": {
     "app-root-path": "^3.0.0",
     "chokidar": "^3.5.3",
     "dependency-tree": "^8.1.2",
     "fs-extra": "^10.0.0",
-    "meow": "9.0.0",
-    "typescript": "^4.5.5"
+    "meow": "9.0.0"
   },
-  "peerDependencies": {
+  "devDependencies": {
+    "@types/node": "^17.0.15",
+    "typescript": "^4.5.5",
     "concurrently": "^6.x",
     "ts-node": "^10.4.0"
-    
   }
 }
