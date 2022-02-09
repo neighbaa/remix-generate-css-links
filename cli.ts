@@ -59,7 +59,7 @@ const allStyleLinksInOneFile = async (filepath: string) => {
     filename: `${appdir}/${filepath}`,
     directory: `${appdir}/`,
     tsConfig: `${projectRoot}/tsconfig.json`,
-    filter: (path: string) => path.indexOf('node_modules') === -1 && path.indexOf(OUTDIR) === -1,
+    filter: (path: string) => (path.split(".").slice(-1)[0] === "css" || path.indexOf('node_modules') === -1) && path.indexOf(OUTDIR) === -1,
   })
     .forEach((path: string) => {
       const pathCheck = path.substring(0,appdirLength)
