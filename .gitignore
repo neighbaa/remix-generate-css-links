@@ -4,6 +4,9 @@ lib
 /.cache
 /build
 /public/build
+/coverage
+/app
 .env
 .archive
 
+yarn-error.log

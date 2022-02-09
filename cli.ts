@@ -45,11 +45,12 @@ const cli = meow(helpText, {
 
 if(typeof cli.flags.outdir === "string" && cli.flags.outdir.length) OUTDIR = cli.flags.outdir
 
-
 // determine app directory
 const remixAppDirectory = remixConfig.appDirectory || "app"
 const appdir = `${projectRoot}/${remixAppDirectory}`
+const nodeModulesDir = `${projectRoot}/node_modules/`
 const appdirLength = appdir.length
+const nodeModulesDirLength = nodeModulesDir.length
 
 // include routes/ in filepath
 const allStyleLinksInOneFile = async (filepath: string) => {
@@ -62,9 +63,12 @@ const allStyleLinksInOneFile = async (filepath: string) => {
     filter: (path: string) => (path.split(".").slice(-1)[0] === "css" || path.indexOf('node_modules') === -1) && path.indexOf(OUTDIR) === -1,
   })
     .forEach((path: string) => {
-      const pathCheck = path.substring(0,appdirLength)
-      if(pathCheck === appdir && path.split(".").slice(-1)[0] === "css") {
-        reducedList.push(`~${path.substring(appdirLength)}`)
+      if(path.split(".").slice(-1)[0] === "css") {
+        if(path.substring(0,appdirLength) === appdir)
+          reducedList.push(`~${path.substring(appdirLength)}`)
+        else if (path.substring(0,nodeModulesDirLength) === nodeModulesDir)
+          reducedList.push(path.substring(nodeModulesDirLength))
+        else throw new Error(`Unexpected path prefix found: ${path}`)
       } 
     });
   
@@ -142,3 +146,5 @@ function watch() {
 if (require.main === module) {
   (async function () { await (cli.flags.watch ? watch : debouncedBuild )() })();
 }
+
+export default require.main === module
