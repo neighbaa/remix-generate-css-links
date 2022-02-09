@@ -1,6 +1,6 @@
 {
   "name": "remix-generate-css-links",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "In your Remix.run project, automatically generate links for your imported .css files. You can import css the way you do in regular React projects and still get the benefits of exporting links in your Remix Run project the remix way.",
   "main": "lib/index.js",
   "types": "index.d.ts",
@@ -31,10 +31,7 @@
     "links"
   ],
   "author": "Julian Hoben",
-  "licenses": [{
-    "type": "MIT",
-    "url": "https://github.com/neighbaa/remix-generate-css-links/raw/master/LICENSE"
-  }],
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/neighbaa/remix-generate-css-links/issues"
   },
