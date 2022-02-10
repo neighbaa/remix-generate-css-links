@@ -1,8 +1,16 @@
 import util from 'util';
+import { ensureFileSync, writeFileSync } from 'fs-extra';
 
 const exec = util.promisify(require('child_process').exec);
 
 jest.setTimeout(10000)
+
+beforeEach(() => {
+  const cssInNodeModulesPath = "node_modules/css-in-node-modules-test/test.css"
+  ensureFileSync(cssInNodeModulesPath);
+  writeFileSync(cssInNodeModulesPath, `.test { color: #000; }`);
+});
+
 test('cli outputs to /app/.generated-css-links', async () => {
   const { stdout, stderr } = await exec('ts-node ./cli');
 

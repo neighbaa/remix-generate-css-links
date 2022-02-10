@@ -1,6 +1,6 @@
 {
   "name": "remix-generate-css-links",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "In your Remix.run project, automatically generate links for your imported .css files. You can import css the way you do in regular React projects and still get the benefits of exporting links in your Remix Run project the remix way.",
   "main": "lib/index.js",
   "types": "index.d.ts",
@@ -45,7 +45,7 @@
     "meow": "9.0.0"
   },
   "devDependencies": {
-    "@solana/wallet-adapter-react-ui": "^0.9.5",
+    "@types/fs-extra": "^9.0.13",
     "@types/node": "^17.0.15",
     "concurrently": "^6.x",
     "jest": "^27.5.1",

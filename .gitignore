@@ -5,8 +5,10 @@ lib
 /build
 /public/build
 /coverage
-/app
 .env
 .archive
 
 yarn-error.log
+
+/app/.generated-css-links
+/app/.somewhere-else
