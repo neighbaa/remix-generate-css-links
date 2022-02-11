@@ -144,7 +144,7 @@ const debounce = (callback: Function, wait: number) => {
 
 const checkAndRunSassCommand = async (watching?: boolean) => {
   if(sassCommand) {
-    const { stdout, stderr } = await exec(`sass ${watching ? "--watch " : " "}${remixAppDirectory}/:${remixAppDirectory}/_${OUTDIR}.sass-css/`);
+    const { stdout, stderr } = await exec(`sass ${watching ? "--watch " : " "}${remixAppDirectory}/:${OUTDIR}.sass-css/`);
   }
 }
 
