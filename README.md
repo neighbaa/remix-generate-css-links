@@ -83,7 +83,7 @@ import  "~/.generated-css-links.sass-css/components/SomeWickedComponent.css" // 
 - Basic
 ```typescript
 ...
-// Generated files live in the app/.generated-css-links directory, unless you specify another directory the --outdir / -o flag.
+// Generated files live in the app/.generated-css-links directory, unless you specify another directory using the --outdir / -o flag.
 // The directory structure is the same as the app/routes, with the ".generated-links" extension OR ~/.generated-css-links/<route-path>.generated-links
 // So in this file, you would get its generated css links like below:
 import { links as _links } from "~/.generated-css-links/routes/some-sweet-as-route.generated-links"
