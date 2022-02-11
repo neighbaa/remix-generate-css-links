@@ -1,10 +1,14 @@
 #!/usr/bin/env node
-require('ts-node').register()
+require('ts-node').register();
 
+import util from 'util';
 import meow from 'meow';
 import chokidar from 'chokidar';
-import type { Dirent } from "fs"
+import type { Dirent } from "fs";
 
+// const sass = require('sass-embedded');
+const exec = util.promisify(require('child_process').exec);
+const commandExists = require('command-exists');
 const dependencyTree = require('dependency-tree');
 const { resolve, join } = require('path');
 const { readdir, writeFile } = require('fs').promises;
@@ -26,7 +30,7 @@ Usage
 $ remix-generate-css-links
 Options
 --watch, -w  Watch for routes changes
---outdir -o Provide app/<output directory name> for directory to output links files (default ${OUTDIR})
+--outdir -o <app dir>/<output directory name> for directory to output links files (default ${OUTDIR})
 `;
 
 const cli = meow(helpText, {
@@ -39,6 +43,9 @@ const cli = meow(helpText, {
     outdir: {
       type: "string",
       alias: "o"
+    },
+    sass: {
+      type: "boolean"
     }
   }
 });
@@ -51,6 +58,17 @@ const appdir = `${projectRoot}/${remixAppDirectory}`
 const nodeModulesDir = `${projectRoot}/node_modules/`
 const appdirLength = appdir.length
 const nodeModulesDirLength = nodeModulesDir.length
+
+let sassCommand = false
+const checkUseSass = async () => {
+  if(!cli.flags.sass) return false
+  try {
+    sassCommand = await commandExists('sass')
+  } catch(error) {
+    console.error(`sass is not an available command - either make sass available from the command line, or remove the --sass option`)
+    process.exit(0)
+  }
+}
 
 // include routes/ in filepath
 const allStyleLinksInOneFile = async (filepath: string) => {
@@ -94,7 +112,7 @@ export const mergeOtherLinks = (_links: HtmlLinkDescriptor[]) => {
 }
 `;
   
-  const generatedFileTarget = `app/${OUTDIR}/${filepath.split(".").slice(0,-1).join(".")}.generated-links.ts`
+  const generatedFileTarget = `${remixAppDirectory}/${OUTDIR}/${filepath.split(".").slice(0,-1).join(".")}.generated-links.ts`
   await ensureFile(generatedFileTarget);
   await writeFile(generatedFileTarget, data);
 }
@@ -115,7 +133,6 @@ async function processFileTree(dir: string) {
   await Promise.all(subDirs.map(async (dirent: Dirent) => await processFileTree(await resolve(dir, dirent.name))))
 }
 
-
 const debounce = (callback: Function, wait: number) => {
   let timeout: any = null
   return (...args: any) => {
@@ -125,7 +142,15 @@ const debounce = (callback: Function, wait: number) => {
   }
 }
 
-const build = async () => {
+const checkAndRunSassCommand = async (watching?: boolean) => {
+  if(sassCommand) {
+    const { stdout, stderr } = await exec(`sass ${watching ? "--watch " : " "}${remixAppDirectory}/:${remixAppDirectory}/${OUTDIR}.sass-css/`);
+  }
+}
+
+const build = async (watching?: boolean) => {
+  if(!watching) await checkAndRunSassCommand()
+
   const appRootfilename = require.resolve(resolve(appdir, "root")).substring(appdirLength+1)
   await allStyleLinksInOneFile(appRootfilename)
   await processFileTree(`${appdir}/routes`)
@@ -134,17 +159,16 @@ const build = async () => {
 const debouncedBuild = debounce(build, 200)
 
 function watch() {
-  debouncedBuild();
-  const projectRoutes = join(`${projectRoot}`, 'app/routes/**/*.{js,jsx,ts,tsx}')
+  checkAndRunSassCommand(true)
+  debouncedBuild(true);
+  const projectRoutes = join(`${projectRoot}`, `${remixAppDirectory}/routes/**/*.{js,jsx,ts,tsx}`)
   const projectConfig = join(`${projectRoot}`, 'remix.config.js')
   chokidar.watch([projectRoutes, projectConfig]).on('change', () => {
-      debouncedBuild();
+      debouncedBuild(true);
   });
   console.log('Watching for changes in your app routes...');
 }
 
 if (require.main === module) {
-  (async function () { await (cli.flags.watch ? watch : debouncedBuild )() })();
+  (async function () { await checkUseSass(); await (cli.flags.watch ? watch : debouncedBuild )() })();
 }
-
-export default require.main === module

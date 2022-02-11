@@ -11,4 +11,5 @@ lib
 yarn-error.log
 
 /app/.generated-css-links
+/app/.generated-css-links.sass-css
 /app/.somewhere-else
