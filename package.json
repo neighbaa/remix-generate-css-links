@@ -1,6 +1,6 @@
 {
   "name": "remix-generate-css-links",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "In your Remix.run project, automatically generate links for your imported .css files. You can import css the way you do in regular React projects and still get the benefits of exporting links in your Remix project the Remix way.",
   "main": "lib/index.js",
   "types": "index.d.ts",
