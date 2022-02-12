@@ -10,7 +10,7 @@ import type { Dirent } from "fs";
 const exec = util.promisify(require('child_process').exec);
 const commandExists = require('command-exists');
 const dependencyTree = require('dependency-tree');
-const { resolve, join } = require('path');
+const { resolve, join, extname } = require('path');
 const { readdir, writeFile } = require('fs').promises;
 const { ensureFile } = require('fs-extra');
 
@@ -56,10 +56,13 @@ if(typeof cli.flags.outdir === "string" && cli.flags.outdir.length) OUTDIR = cli
 const remixAppDirectory = remixConfig.appDirectory || "app"
 const appdir = `${projectRoot}/${remixAppDirectory}`
 const nodeModulesDir = `${projectRoot}/node_modules/`
+const projectRootLength = `${projectRoot}`.length + 1
 const appdirLength = appdir.length
 const nodeModulesDirLength = nodeModulesDir.length
 
 let sassCommand = false
+let sassOutputDir = ""
+let sassOutputDirLength = 0
 const checkUseSass = async () => {
   if(!cli.flags.sass) return false
   try {
@@ -78,7 +81,7 @@ const allStyleLinksInOneFile = async (filepath: string) => {
     filename: `${appdir}/${filepath}`,
     directory: `${appdir}/`,
     tsConfig: `${projectRoot}/tsconfig.json`,
-    filter: (path: string) => (path.split(".").slice(-1)[0] === "css" || path.indexOf('node_modules') === -1) && path.indexOf(OUTDIR) === -1,
+    filter: (path: string) => (path.split(".").slice(-1)[0] === "css" || path.indexOf('node_modules') === -1) && ((sassCommand && path.substring(0,sassOutputDirLength) === sassOutputDir) || path.indexOf(OUTDIR) === -1),
   })
     .forEach((path: string) => {
       if(path.split(".").slice(-1)[0] === "css") {
@@ -86,7 +89,9 @@ const allStyleLinksInOneFile = async (filepath: string) => {
           reducedList.push(`~${path.substring(appdirLength)}`)
         else if (path.substring(0,nodeModulesDirLength) === nodeModulesDir)
           reducedList.push(path.substring(nodeModulesDirLength))
-        else throw new Error(`Unexpected path prefix found: ${path}`)
+        else if (sassCommand && path.substring(0,sassOutputDirLength) === sassOutputDir)
+          reducedList.push(`~/../${path.substring(projectRootLength)}`)
+        // else throw new Error(`Unexpected path prefix found: ${path}, ${path.substring(0,sassOutputDirLength)}, ${sassOutputDir}, ${path.substring(0,sassOutputDirLength) === sassOutputDir}`)
       } 
     });
   
@@ -122,8 +127,12 @@ async function processFileTree(dir: string) {
   const subDirs: Dirent[] = []
   // handle files at top before subdirs
   await Promise.all(dirents.filter((dirent: Dirent) => {
-    if(dirent.isDirectory()) subDirs.push(dirent)
-    else return true
+    if(dirent.isDirectory()) {
+      subDirs.push(dirent)
+      return false
+    }
+    const extension: string = extname(dirent.name)
+    return [".js",".jsx",".ts",".tsx"].includes(extension)
   }).map(async (dirent: Dirent) => {
     const fullPath = await resolve(dir, dirent.name)
     const pathFromAppDirectory = (fullPath).substring(appdirLength+1)
@@ -144,12 +153,16 @@ const debounce = (callback: Function, wait: number) => {
 
 const checkAndRunSassCommand = async (watching?: boolean) => {
   if(sassCommand) {
+    sassOutputDir = `${projectRoot}/${OUTDIR}.sass-css/`
+    sassOutputDirLength = sassOutputDir.length
     const { stdout, stderr } = await exec(`sass ${watching ? "--watch " : " "}${remixAppDirectory}/:${OUTDIR}.sass-css/`);
   }
 }
 
 const build = async (watching?: boolean) => {
-  if(!watching) await checkAndRunSassCommand()
+  if(!watching) {
+    await checkAndRunSassCommand()
+  }
 
   const appRootfilename = require.resolve(resolve(appdir, "root")).substring(appdirLength+1)
   await allStyleLinksInOneFile(appRootfilename)
