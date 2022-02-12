@@ -62,8 +62,8 @@ $ npm install --save-dev remix-generate-css-links
 import './LocalStyle.css';
 import '../../SomeOtherStyle.css';
 
-// If you're using sass with the --sass flag, you would import them from ~/<your-given-output-directory>.sass-css
-import  "~/.generated-css-links.sass-css/components/SomeWickedComponent.css" // <-- converted from <app dir>/components/SomeWickedComponent.scss
+// If you're using sass with the --sass flag, you would import them from ~/../<your-given-output-directory>.sass-css
+import  "~/../.generated-css-links.sass-css/components/SomeWickedComponent.css" // <-- converted from <app dir>/components/SomeWickedComponent.scss
 
 // That's it. There's no need to export these as links like you would below. Though if you did, it would still work.
 // export const links = () => {
@@ -141,7 +141,7 @@ export const links: LinksFunction = () => {
 
 - `-w`: Watch for changes and automatically rebuild.
 - `-o`: Change the output directory for the generated files. It will live at `<app dir>/<your-given-output-directory>`
-- `--sass`: Compile your scss/sass files into <app dir>/<your-given-output-directory>.sass-css`
+- `--sass`: Compile your scss/sass files into <project root>/<your-given-output-directory>.sass-css`
 
 ## License
 
