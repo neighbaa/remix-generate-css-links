@@ -141,7 +141,7 @@ export const links: LinksFunction = () => {
 
 - `-w`: Watch for changes and automatically rebuild.
 - `-o`: Change the output directory for the generated files. It will live at `<app dir>/<your-given-output-directory>`
-- `--sass`: Compile your scss/sass files into <project root>/<your-given-output-directory>.sass-css`
+- `--sass`: Compile your scss/sass files into <project root>/<your-given-output-directory>.sass-css
 
 ## License
 
