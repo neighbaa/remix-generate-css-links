@@ -1,0 +1,4 @@
+{
+  "repository": "neighbaa/.ghenv",
+  "pattern": ["**/.env","**/lib/**",".archive/**"]
+}
